@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -22,10 +23,17 @@ public class InventoryController {
         this.inventoryItemRepository = inventoryItemRepository;
     }
 
+    @GetMapping("/api/inventory")
+    public ResponseEntity<List<InventoryItem>> findInventory() {
+        log.info("Finding inventory for products");
+        List<InventoryItem> inventoryItems = inventoryItemRepository.findAll();
+        return ResponseEntity.ok(inventoryItems);
+    }
+
     @GetMapping("/api/inventory/{productCode}")
     public ResponseEntity<InventoryItem> findInventoryByProductCode(@PathVariable("productCode") String productCode) {
         log.info("Finding inventory for product code :"+productCode);
         Optional<InventoryItem> inventoryItem = inventoryItemRepository.findByProductCode(productCode);
-        return inventoryItem.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return inventoryItem.map(ResponseEntity::ok).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 }
